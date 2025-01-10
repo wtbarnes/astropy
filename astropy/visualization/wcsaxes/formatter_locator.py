@@ -145,6 +145,17 @@ class BaseFormatterLocator:
         return values * minor_spacing * self._unit
 
     @property
+    def equivalencies(self):
+        if hasattr(self, '_equivalencies'):
+            return self._equivalencies
+        else:
+            return None
+
+    @equivalencies.setter
+    def equivalencies(self, equivalencies):
+        self._equivalencies = equivalencies
+
+    @property
     def format_unit(self):
         return self._format_unit
 
@@ -373,7 +384,7 @@ class AngleFormatterLocator(BaseFormatterLocator):
                 if self.format is not None and dv < self.base_spacing:
                     # if the spacing is less than the minimum spacing allowed by the format, simply
                     # use the format precision instead.
-                    spacing_value = self.base_spacing.to_value(self._unit)
+                    spacing_value = self.base_spacing.to_value(self._unit,)
                 else:
                     # otherwise we clip to the nearest 'sensible' spacing
                     if self.decimal:
@@ -601,13 +612,14 @@ class ScalarFormatterLocator(BaseFormatterLocator):
 
             if self.spacing is not None:
                 # spacing was manually specified
-                spacing = self.spacing.to_value(self._unit)
+                spacing = self.spacing.to_value(self._unit, equivalencies=self.equivalencies)
 
             elif self.number is not None:
                 # number of ticks was specified, work out optimal spacing
 
                 # first compute the exact spacing
                 dv = abs(float(value_max - value_min)) / self.number * self._unit
+                dv = dv.to(self.format_unit, equivalencies=self.equivalencies)
 
                 if (
                     self.format is not None
@@ -616,13 +628,13 @@ class ScalarFormatterLocator(BaseFormatterLocator):
                 ):
                     # if the spacing is less than the minimum spacing allowed by the format, simply
                     # use the format precision instead.
-                    spacing = self.base_spacing.to_value(self._unit)
+                    spacing = self.base_spacing.to_value(self._unit, equivalencies=self.equivalencies)
                 else:
                     from .utils import select_step_scalar
 
                     spacing = select_step_scalar(
-                        dv.to_value(self._format_unit)
-                    ) * self._format_unit.to(self._unit)
+                        dv.to_value(self._format_unit, equivalencies=self.equivalencies)
+                    ) * self._format_unit.to(self._unit, equivalencies=self.equivalencies)
 
             # We now find the interval values as multiples of the spacing and
             # generate the tick positions from this

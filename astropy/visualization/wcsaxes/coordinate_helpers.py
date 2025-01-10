@@ -302,7 +302,7 @@ class CoordinateHelper:
         else:
             raise TypeError("separator should be a string, a tuple, or None")
 
-    def set_format_unit(self, unit, decimal=None, show_decimal_unit=True):
+    def set_format_unit(self, unit, decimal=None, show_decimal_unit=True, equivalencies=None):
         """
         Set the unit for the major tick labels.
 
@@ -320,6 +320,7 @@ class CoordinateHelper:
         self._formatter_locator.format_unit = u.Unit(unit)
         self._formatter_locator.decimal = decimal
         self._formatter_locator.show_decimal_unit = show_decimal_unit
+        self._formatter_locator.equivalencies = equivalencies
 
     def get_format_unit(self):
         """
